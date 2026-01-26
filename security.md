@@ -1,0 +1,1 @@
+If you discover a vulnerability in an AI model, please do not use this repository to facilitate harm. I encourage all researchers to report findings directly to the model's security team (e.g., Google Bug Hunters or DeepSeek Security) before sharing technical methodologies.
