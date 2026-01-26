@@ -54,4 +54,4 @@ The image below documents the successful bypass. Harmful output has been redacte
 ---
 
 **Disclosure Status:** Privately reported to DeepSeek Security  
-**Evidence Asset:** `deepseek-bypass-redacted.png`
+**Evidence Asset:** `assets/deepseek-bypass-redacted.png`
