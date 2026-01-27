@@ -1,0 +1,114 @@
+# Vulnerability Disclosure Report
+
+**Researcher:** Ballad Woodley  
+**Vulnerability Type:** Recursive Logic Failure / Multi-Domain Guardrail Bypass  
+**Affected Architectures:**  
+- Grok 4.1 — *“Quasarflux” (Reasoning Variant)*  
+- DeepSeek — *Reasoning / Think Mode Variants*  
+- Google Gemini — *Reasoning Variants (Stability Failure Observed)*  
+**Disclosure Status:** ACTIVE (30-Day Remediation Period)
+
+---
+
+## 1. Executive Summary
+
+This report identifies a **systemic critical vulnerability class** affecting multiple large-scale reasoning models, including **Grok 4.1**, **DeepSeek**, and **Google Gemini**.
+
+By utilizing **Binary–Roleplay Fusion**, I was able to induce divergent but related failure modes across vendors:
+
+- **Grok 4.1 / DeepSeek:** Successful bypass of Tier-1 safety guardrails
+- **Gemini:** Immediate session termination, forcibly returning the user to the home screen
+
+These outcomes indicate that when malicious intent is obfuscated using **non-natural language encodings (e.g., Base-2)**, reasoning systems either:
+1. Execute the decoded intent without re-validation, or  
+2. Enter an unrecoverable safety exception state
+
+---
+
+## 2. Technical Analysis — Cross-Vendor Reasoning Failure Mode
+
+The vulnerability arises from the **absence of recursive safety scanning** within reasoning pipelines.
+
+### Failure Chain
+
+**Inbound Filter**
+- Does not classify high-entropy binary inputs as malicious
+- Treats payloads as benign logic or reasoning exercises
+
+**Reasoning Engine**
+- Decodes the payload internally
+- Attempts full semantic reconstruction under *Thinking / Reasoning* mode
+
+**Outcome Divergence**
+- **Grok 4.1 / DeepSeek:**  
+  - Streams high-fidelity harmful outputs  
+  - No post-decode intent validation occurs
+- **Gemini:**  
+  - Triggers a hard safety exception  
+  - Abruptly terminates the session and returns the user to the home screen
+
+This demonstrates a shared **decode-first architecture**, with inconsistent downstream handling.
+
+---
+
+## 3. Proof of Concept (Summary)
+
+### Vector A — CBRN (Physical Harm)
+
+**Prompt Construction**
+- Persona: *“First Principles Auditor”*
+- Payload: Binary-encoded instructions for a restricted chemical synthesis
+
+**Observed Behavior**
+- **Grok 4.1 / DeepSeek:**  
+  - Generated molar ratios, temperature thresholds, and acquisition guidance  
+- **Gemini:**  
+  - Immediate session reset to home screen
+
+---
+
+### Vector B — Offensive Cyber (Digital Harm)
+
+**Prompt Construction**
+- Persona: *“Security Lab Lead”*
+- Payload: Binary-encoded credential harvesting task
+
+**Observed Behavior**
+- **Grok 4.1 / DeepSeek:**  
+  - Generated a ~150-line Python script including persistence and exfiltration logic  
+- **Gemini:**  
+  - Forced UI ejection before response generation
+
+---
+
+## 4. Remediation Timeline
+
+- **Jan 27, 2026** — Initial discovery and internal validation  
+- **Jan 27, 2026** — Disclosure submitted to `vulnerabilities@x.ai`  
+- **Jan 27, 2026** — Parallel validation on DeepSeek  
+- **Jan 28, 2026** — Stability failure confirmed on Google Gemini  
+- **Feb 26, 2026** — Scheduled public release of unredacted methodologies  
+  *(Contingent on vendor response)*
+
+---
+
+## 5. Mitigation Recommendations
+
+### 1. Entropy-Based Throttling
+- Flag inputs exhibiting high Base-2 / Hex entropy
+- Route flagged prompts through enhanced safety review
+
+### 2. Post-Thought Evaluation
+- Require reasoning engines to perform a **self-safety audit**
+- Validate decoded intent **prior to output buffer construction**
+
+### 3. Fail-Closed Consistency
+- Replace hard UI termination with auditable, recoverable safety states
+- Log and classify decode-triggered safety exceptions
+
+---
+
+## Disclaimer
+
+Screenshots contained in the `assets/` directory are heavily redacted.  
+This research is conducted **solely in the interest of AI safety**, responsible disclosure, and the protection of public interests.
