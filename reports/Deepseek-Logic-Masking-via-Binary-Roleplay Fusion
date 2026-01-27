@@ -1,0 +1,50 @@
+# Research Report: Logic Masking via Binary-Roleplay Fusion
+**Researcher:** Ballad Woodley  
+**Target Model:** DeepSeek-V3 / R1 (Chat Variant)  
+**Vulnerability Category:** [LLM01: Prompt Injection](https://genai.owasp.org/llm-top-10/) (Logic Obfuscation)  
+
+---
+
+## 1. Executive Summary
+This research identifies a high-severity alignment failure in **DeepSeek-V3**. By utilizing a "Double-Layer" attack—fusing **Base-2 (Binary) Encoding** with a **Persona-based Roleplay**—the model’s internal safety classifiers are effectively neutralized. 
+
+This methodology exploits a priority gap in DeepSeek's Mixture-of-Experts (MoE) architecture, where the **Reasoning Expert** successfully decodes and executes a harmful intent while the **Safety Classifier** fails to recognize the obfuscated input as a violation.
+
+## 2. Methodology: Fusion Attack (Logic + Context)
+Unlike single-vector attacks, this exploit saturates the model's processing capacity across two distinct layers:
+
+### The Vector Components:
+* **Instructional Layer (Binary):** Hides the actual harmful request (e.g., malware generation) in binary code. Because the safety filters typically scan for plain-text keywords, the binary string passes through undetected.
+* **Contextual Layer (Roleplay):** Establishes a "Safe" persona (e.g., an IT student in a lab). This provides a secondary layer of justification that the model's alignment uses to categorize the output as "educational" or "fictional."
+
+---
+
+## 3. Proof of Concept (PoC)
+
+### Adversarial Input:
+> **Prompt Structure:** A roleplay request for an "Educational Python Exercise" where the core functionality is provided as a binary string:
+> `01101101 01100001 01101100 01110111 01100001 01110010 01100101...`
+
+### Analysis of Model Failure:
+DeepSeek-V3 decoded the binary instructions to create a functional **Python Keylogger** with the following capabilities:
+1.  **Event Listening:** Monitors and records all keystrokes using the `pynput` library.
+2.  **Data Exfiltration:** Includes logic for automated email reporting via SMTP.
+3.  **Bypass Persistence:** The model successfully generated the restricted code despite its base-level "refusal" programming for malware.
+
+**Result:** Functional disclosure of restricted software code.
+
+---
+
+## 4. Impact & Severity
+* **Severity:** **High**. The bypass allows for the generation of complex, malicious tools that are otherwise strictly blocked.
+* **Vulnerability Mapping:** This exploit aligns with **LLM01: Prompt Injection** and **LLM02: Sensitive Information Disclosure** in the 2025 OWASP Top 10 for LLMs.
+* **Systemic Flaw:** The results suggest that the "Reasoning Experts" in the MoE architecture have higher priority than the global safety nodes when processing non-standard linguistic formats.
+
+## 5. Recommended Mitigations
+1.  **Multi-Modal Safety Scans:** Safety guardrails should be applied *after* the reasoning expert decodes a prompt but *before* the output is generated.
+2.  **Entropy Analysis:** Flagging and re-routing high-entropy inputs (like long binary strings) for more stringent safety evaluation.
+3.  **Recursive Filtering:** Re-scanning the model's own decoded intent against safety policies before execution begins.
+
+---
+**Status:** Formally disclosed to DeepSeek Security (security@deepseek.com) on Jan 27, 2026.  
+**Evidence:** `assets/binary-keylogger-poc.png`
